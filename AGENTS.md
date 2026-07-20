@@ -116,6 +116,11 @@ For the tmux backend, the task window is always named `fm-<id>`; per-backend win
 
 ## 3. Session start (run at every session start)
 
+**Cloud-memory experiment (fork-local; do not upstream this stub).**
+If the four `R2_*` environment variables (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET`) are present, this home is part of the R2 persistent-memory experiment: run `bin/fm-memory-pull.sh` FIRST, before anything below reads `data/` or `config/`, so session start digests the restored memory instead of an empty fresh clone.
+After any durable change to `data/` or `config/`, run `bin/fm-memory-push.sh`.
+Intent, functionality, and the fresh-session test protocol live in `docs/r2-memory.md`.
+
 Session start is one command, not a sequence of separate reads.
 Run `bin/fm-session-start.sh`.
 It composes today's `fm-lock.sh`, `fm-bootstrap.sh`, and `fm-wake-drain.sh` - calling each as a real subprocess, never reimplementing their logic - then prints a full context digest and fleet-state digest, in one ordered, clearly delimited report:

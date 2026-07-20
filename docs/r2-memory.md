@@ -3,6 +3,30 @@
 Cloud firstmate sessions are ephemeral: the container loses `data/` and `config/` between runs.
 `bin/fm-memory-push.sh` and `bin/fm-memory-pull.sh` back those two directories up to an S3-compatible Cloudflare R2 bucket and restore them into a fresh clone.
 
+## Experiment status (read this first in a new session)
+
+This is an early experiment, started 2026-07-20, living only on the fork's `claude/r2-persistent-memory-k5sivy` branch.
+R2 was the first storage candidate tried, chosen with no comparative data; it is a testbed, not a decision, and other backends remain unevaluated.
+Do not open a PR to the upstream repo (`kunchenguid/firstmate`) with this work until the approach is fully tested and deliberately chosen as the best option - the captain's standing rule, also recorded in the memory snapshot's `data/captain.md`.
+
+What exists and is intended so far:
+
+- `bin/fm-memory-push.sh` mirrors `data/` and `config/` to the bucket's `memory/` prefix; `state/` and `projects/` are deliberately excluded.
+- `bin/fm-memory-pull.sh` restores them; safe on a fresh clone, never deletes local files, refuses (loudly, with `--force` as the override) to overwrite local files newer than the snapshot.
+- `bin/fm-memory-lib.sh` holds the shared credential checks and the environment-only rclone configuration.
+- `tests/fm-memory-sync.test.sh` covers both with fake-rclone unit tests plus a self-skipping real-bucket e2e.
+- The stub at the top of `AGENTS.md` section 3 is the fresh-session entry point: pull before session start digests `data/`, push after durable changes.
+- Not yet built, pending the experiment's verdict: automatic pull/push wiring inside `fm-session-start.sh` or hooks, backend comparison, and any upstreaming.
+
+## Fresh-session test protocol
+
+1. Confirm the four `R2_*` variables are present (existence only; never print values).
+2. Confirm rclone is installed (`apt-get update && apt-get install -y rclone` in the cloud sandbox).
+3. Run `bin/fm-memory-pull.sh` and confirm it restores `data/captain.md` containing the captain's standing rules - that file round-tripping is the experiment's core success signal.
+4. Exercise a change: edit or add a file under `data/`, run `bin/fm-memory-push.sh`, and confirm the object changed (`rclone lsf` via the lib, or a second pull into a temp `FM_HOME`).
+5. Confirm the newer-local guard: edit a restored file locally, pull again, and expect the loud NOT-overwritten report instead of silent loss.
+6. Record observations (latency, quirks, failures) here in the verification record, dated, with exact commands and output.
+
 ## Usage
 
 ```sh
