@@ -55,3 +55,15 @@ All facts below were verified 2026-07-19 and 2026-07-20 against rclone 1.60.1 on
   Adding the subscription and creating the bucket fixed it within a minute; the same failure is also the signature of a wrong account hash in `R2_ENDPOINT` or a jurisdiction-scoped bucket (`<accountid>.eu.r2.cloudflarestorage.com`) addressed via the plain hostname.
 
 The end-to-end proof (push a fixture home, pull into a wiped home, byte-identical `diff -r`, newer-local skip report, `--force` overwrite, purge) is automated as the self-skipping tail of `tests/fm-memory-sync.test.sh`: it runs only when the four `R2_*` variables are set, rclone is installed, and the bucket answers, so CI without credentials skips it cleanly.
+
+### Fresh-session test result (2026-07-20, second cloud session)
+
+The fresh-session protocol above passed end to end in a genuinely new container with no prompting beyond "where did we leave off":
+
+1. The `AGENTS.md` section 3 stub was noticed before session start; the four `R2_*` variables were present.
+2. rclone was absent in the fresh container and installed per step 2 (`apt-get install -y rclone`, 1.60.1); `fm-memory-pull.sh` fails loudly and safely when rclone is missing (exit 1, names the tool and install command).
+3. First `bin/fm-memory-pull.sh` restored `data/` and `config/` in ~8s total; `data/captain.md` came back with the standing rules intact - the core success signal - and the restored backlog/runbook let the session resume the exact in-flight work.
+4. Round-trip: appended a probe file under `data/`, `bin/fm-memory-push.sh` mirrored it (first PutObject hit the known 501-then-retry quirk twice, absorbed automatically), and `rclone lsf` confirmed the object in `memory/data/`.
+5. Newer-local guard: after a local edit newer than the snapshot, `bin/fm-memory-pull.sh` printed the loud bordered NOT-overwritten report naming the file and preserved the local content.
+
+Latency: pull ~4s per directory through the CCR agent proxy; push similar. No quirks beyond those already recorded above.
