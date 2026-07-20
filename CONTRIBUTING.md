@@ -114,6 +114,7 @@ tests/fm-backend-orca.test.sh             # fake Orca CLI unit tests for primiti
 tests/cmux-test-safety.sh                 # guarded cleanup helper for real-cmux tests, refusing to close anything except a matching fm-test- workspace
 tests/fm-backend-cmux.test.sh             # fake cmux CLI unit tests for the experimental cmux adapter, including socket auth, title scoping, target recovery, fresh-surface liveness, current-path probing, structural composer verification, and secondmate refusal
 tests/fm-backend-cmux-smoke.test.sh       # real cmux adapter smoke test, skipped when cmux or jq is unavailable or the socket is not password-mode authenticated, using fm-test- workspaces and guarded cleanup
+tests/fm-memory-sync.test.sh              # R2 persistent-memory sync (bin/fm-memory-push.sh / fm-memory-pull.sh): loud missing-variable failures, no-secret-leak, sync/copy argument shapes, state/ and projects/ exclusion, --dry-run and --force passthrough, newer-local skip reporting, plus a self-skipping real-bucket push/wipe/pull/diff e2e under a throwaway prefix (docs/r2-memory.md)
 [ "$(readlink CLAUDE.md)" = "AGENTS.md" ]
 [ "$(readlink .claude/skills)" = "../.agents/skills" ]
 tmp=$(mktemp -d) && printf 'done: smoke\n' > "$tmp/smoke.status" && FM_STATE_OVERRIDE="$tmp" FM_SIGNAL_GRACE=1 FM_POLL=1 FM_HEARTBEAT=999999 bin/fm-watch-arm.sh  # watcher re-arm smoke test (prints arm status, then an actionable signal)
