@@ -16,7 +16,10 @@ What exists and is intended so far:
 - `bin/fm-memory-lib.sh` holds the shared credential checks and the environment-only rclone configuration.
 - `tests/fm-memory-sync.test.sh` covers both with fake-rclone unit tests plus a self-skipping real-bucket e2e.
 - The stub at the top of `AGENTS.md` section 3 is the fresh-session entry point: pull before session start digests `data/`, push after durable changes.
-- Not yet built, pending the experiment's verdict: automatic pull/push wiring inside `fm-session-start.sh` or hooks, backend comparison, and any upstreaming.
+- Not yet built, pending the experiment's verdict: automatic pull/push wiring inside `fm-session-start.sh` or hooks, and any upstreaming.
+- Backend comparison (2026-07-23, recommendation awaiting the captain's ratification): the scripts' real dependency is *any S3-compatible object store via rclone with four env vars*, so the interface, not the vendor, is the durable choice.
+  R2 is the recommended default provider - the only empirically verified option here, permanent 10 GB free tier, $0 egress; Backblaze B2 is the designated drop-in fallback (endpoint + key swap, no code change); AWS S3 and GCS S3-interop work but add account friction for no benefit at this scale; GitHub Actions artifacts are disqualified (retention TTL, 90-400 days, deletes memory); a git-branch/private-repo store is the no-new-accounts fallback only (session repo-scope wiring, git-history privacy posture, and a rebuild of tested sync logic).
+  Full comparison in the fleet-private report `data/memory-backend-comparison-r2/report.md`.
 
 ## Fresh-session test protocol
 
